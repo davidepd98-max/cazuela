@@ -1,0 +1,57 @@
+{
+ "version": "2026-11-09",
+ "prices": {},
+ "ingredients": {},
+ "recipes": [],
+ "folleto": {
+  "id": "2026-11-09",
+  "name": "Folleto 9–15 nov",
+  "items": {
+   "calabacin": {
+    "price": 0.44,
+    "pack": 1,
+    "from": "2026-11-09",
+    "until": "2026-11-15",
+    "plus": true,
+    "note": "1,25 €/kg a granel"
+   },
+   "aguacate": {
+    "price": 2.49,
+    "pack": 3,
+    "from": "2026-11-09",
+    "until": "2026-11-15",
+    "note": "malla de 700 g (unos 3 aguacates)"
+   },
+   "masa": {
+    "price": 1.19,
+    "pack": 1,
+    "from": "2026-11-09",
+    "until": "2026-11-15",
+    "plus": true,
+    "note": "Chef Select 400 g"
+   },
+   "tortillas": {
+    "price": 0.75,
+    "pack": 8,
+    "from": "2026-11-13",
+    "until": "2026-11-15",
+    "note": "Tastino 320 g, solo Súper Finde"
+   },
+   "pepino": {
+    "price": 0.75,
+    "pack": 1,
+    "from": "2026-11-13",
+    "until": "2026-11-15",
+    "note": "Almería, solo Súper Finde"
+   },
+   "salmon": {
+    "price": 6.69,
+    "pack": 450,
+    "from": "2026-11-13",
+    "until": "2026-11-15",
+    "plus": true,
+    "note": "2 rodajas de unos 450 g, solo Súper Finde"
+   }
+  }
+ }
+}
