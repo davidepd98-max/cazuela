@@ -120,6 +120,10 @@ nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--accent
 .thumb{width:58px;height:58px;border-radius:12px;display:block;overflow:hidden;object-fit:cover;background:var(--bg)}
 .thumb svg,.hero svg{width:100%;height:100%;display:block}
 .thumbbtn{border:0;padding:0;background:none;border-radius:12px}
+.ph{position:relative}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.credit{font-size:.72rem;color:var(--muted);text-align:center;margin:-4px 0 8px}
+.credit a{color:inherit}
 .hero{width:100%;max-width:260px;aspect-ratio:1/1;margin:8px auto 10px;display:block;border-radius:18px;object-fit:cover;overflow:hidden}
 .rec{justify-content:flex-start}
 .rec > .thumbbtn{flex:none}
@@ -244,6 +248,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--accent
         <p class="hint">Para pasar tu menú, gustos, recetas y ofertas a otro móvil o a la app instalada: copia tus datos aquí y pégalos allí.</p>
         <div class="actions"><button class="btn" type="button" data-act="export">Copiar mis datos</button><button class="btn" type="button" data-act="import">Pegar datos</button></div>
       </div>
+      <div class="card section" id="creditsBox" hidden></div>
       <div class="actions" style="margin-bottom:20px">
         <button class="btn primary" type="submit">Guardar y crear menú nuevo</button>
       </div>
@@ -637,6 +642,12 @@ function renderProfile(){
   $("#pDiet").value=p.diet; $("#rGluten").checked=p.gluten; $("#rLact").checked=p.lact; $("#rNuts").checked=p.nuts;
   $("#pGoal").value=p.goal; renderPrefs(); $("#aHorno").checked=p.horno; $("#aAir").checked=p.air;
 }
+function renderCredits(){
+  const box=$("#creditsBox"); if(!box) return; const list=Object.entries(REAL).filter(([id,v])=>v&&v.url&&rec(id));
+  if(!window.CAZUELA_PWA || !list.length){ box.hidden=true; return; }
+  box.hidden=false; box.innerHTML = `<h2>Créditos de las fotos</h2><p class="hint">Fotos de ejemplo con licencia libre de Wikimedia Commons. Pueden no coincidir exactamente con tu receta.</p>
+    <ul class="hint" style="padding-left:18px;margin:0">${list.map(([id,v])=>`<li>${esc(rec(id).name)}: <a href="${esc(v.page)}" target="_blank" rel="noopener">${esc(v.author)}</a>, ${esc(v.license)}</li>`).join("")}</ul>`;
+}
 function renderPrefs(){
   const all = Object.assign({}, ING, S.customIng);
   $("#prefChips").innerHTML = AISLES.map(a=>{
@@ -648,7 +659,7 @@ function renderPrefs(){
 }
 function renderAll(){
   $("#superLabel").textContent = `${S.profile.people} pers. · ${S.profile.super}`;
-  renderSummary(); renderDays(); renderShop(); renderRecipes(); renderCtrlSlots();
+  renderSummary(); renderDays(); renderShop(); renderRecipes(); renderCtrlSlots(); renderCredits();
 }
 
 /* ---------- Imágenes de los platos ---------- */
@@ -729,7 +740,13 @@ function plateSVG(r){
 }
 const PHOTO_KEY = "cazuela-fotos";
 let PHOTOS = {}; try{ PHOTOS = JSON.parse(localStorage.getItem(PHOTO_KEY)||"{}"); }catch(e){}
-function dishImg(r, cls){ return PHOTOS[r.id] ? `<img class="${cls}" src="${PHOTOS[r.id]}" alt="Tu foto de ${esc(r.name)}">` : `<span class="${cls}">${plateSVG(r)}</span>`; }
+function dishImg(r, cls){
+  if(PHOTOS[r.id]) return `<img class="${cls}" src="${PHOTOS[r.id]}" alt="Tu foto de ${esc(r.name)}">`;
+  const rp = window.CAZUELA_PWA && REAL[r.id];
+  if(rp && rp.url) return `<span class="${cls} ph">${plateSVG(r)}<img src="${esc(rp.url)}" alt="Foto de ${esc(r.name)}" loading="lazy" onerror="this.remove()"></span>`;
+  return `<span class="${cls}">${plateSVG(r)}</span>`;
+}
+function reopenRecipe(id){ const sh=document.querySelector("#sheet [data-photo]"); showRecipe(id, sh && sh.dataset.day!==""? +sh.dataset.day : null, sh && sh.dataset.slot || null); }
 function savePhoto(id, file){
   const img = new Image(); const url = URL.createObjectURL(file);
   img.onload = ()=>{ const s=480, c=document.createElement("canvas"); const k=Math.min(img.width,img.height); c.width=s; c.height=s;
@@ -739,6 +756,47 @@ function savePhoto(id, file){
     renderAll(); const sh=document.querySelector("#sheet [data-photo]"); if(sh) showRecipe(id, sh.dataset.day===""?null:+sh.dataset.day, sh.dataset.slot||null); };
   img.onerror = ()=>{ URL.revokeObjectURL(url); toast("No se ha podido leer esa imagen"); };
   img.src = url;
+}
+
+/* ---------- Fotos reales (solo app instalada) ---------- */
+// Fotos con licencia libre de Wikimedia Commons, con su autor y licencia.
+const PHOTO_Q = {
+  r1:"Chicken curry with rice", r2:"Lentejas estofadas", r3:"Macarrones con tomate y carne", r4:"Baked salmon with potatoes",
+  r5:"Tortilla de patatas", r6:"Espinacas con garbanzos", r7:"Chicken fajitas", r8:"Merluza en salsa verde",
+  r9:"Arroz tres delicias", r10:"Chickpea curry coconut", r11:"Pasta al pesto", r12:"Vegetable pizza",
+  r13:"Roasted chicken thighs potatoes", r14:"Couscous salad", r15:"Tofu broccoli stir fry", r16:"Chili sin carne",
+  r17:"Lomo de cerdo a la plancha", r18:"Espaguetis con gambas", r19:"Revuelto de setas", r20:"Ensalada de atún",
+  r21:"Quinoa roasted vegetables", r22:"Lemon chicken couscous", r23:"Albóndigas en salsa", r24:"Crema de calabacín",
+  r25:"Mujaddara", r26:"Hamburger with french fries", r27:"Merluza al horno", r28:"Cashew chicken",
+  r29:"Pasta with mushroom cream sauce", r30:"Patatas a la riojana", r31:"Paella valenciana", r32:"Arroz al horno",
+  r33:"Pisto con huevo", r34:"Grilled chicken breast salad", r35:"Tortilla de calabacín", r36:"Berenjenas rellenas",
+  r37:"Judías verdes con patatas", r38:"Grilled salmon with vegetables"
+};
+const REAL_KEY = "cazuela-fotos-reales";
+let REAL = {}; try{ REAL = JSON.parse(localStorage.getItem(REAL_KEY)||"{}"); }catch(e){}
+const saveReal = () => { try{ localStorage.setItem(REAL_KEY, JSON.stringify(REAL)); }catch(e){} };
+const stripTags = h => { const d=document.createElement("div"); d.innerHTML=h||""; return (d.textContent||"").replace(/\s+/g," ").trim(); };
+async function findReal(r, idx){
+  const q = (PHOTO_Q[r.id] || r.name) + " filetype:bitmap";
+  const url = "https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=12&gsrsearch="
+    + encodeURIComponent(q) + "&prop=imageinfo&iiprop=url|extmetadata|mime|size&iiurlwidth=480";
+  const j = await fetch(url).then(x=>x.json());
+  const pages = Object.values((j.query||{}).pages||{}).sort((a,b)=>a.index-b.index)
+    .filter(p=>p.imageinfo && /jpeg|png/.test(p.imageinfo[0].mime) && p.imageinfo[0].width>=400);
+  if(!pages.length) return {none:true, idx};
+  const p = pages[idx % pages.length], ii = p.imageinfo[0], m = ii.extmetadata||{};
+  return {url: ii.thumburl, page: ii.descriptionurl, author: stripTags((m.Artist||{}).value).slice(0,80) || "Autor desconocido",
+          license: stripTags((m.LicenseShortName||{}).value) || "Licencia libre", idx, total: pages.length};
+}
+let realBusy = false;
+async function loadRealPhotos(){
+  if(!window.CAZUELA_PWA || realBusy || !navigator.onLine) return; realBusy = true;
+  let changed = 0;
+  for(const r of allRecipes()){
+    if(REAL[r.id]) continue;
+    try{ REAL[r.id] = await findReal(r, 0); changed++; saveReal(); if(changed % 6 === 0) renderAll(); }catch(e){ break; }
+  }
+  realBusy = false; if(changed) renderAll();
 }
 
 /* ---------- Hojas ---------- */
@@ -754,7 +812,11 @@ function showRecipe(id, day, slot){
       <input id="photoIn" type="file" accept="image/*" hidden data-photo="${r.id}" data-day="${day==null?'':day}" data-slot="${slot||''}">
       ${PHOTOS[r.id]?`<button class="btn small ghost danger" type="button" data-rmphoto="${r.id}" data-day="${day==null?'':day}" data-slot="${slot||''}">Quitar foto</button>`:''}
     </div>
-    ${PHOTOS[r.id]?'':'<p class="hint" style="text-align:center;margin-top:-4px">Ilustración hecha con sus ingredientes. Cuando lo cocines, hazle una foto.</p>'}
+    ${(()=>{ if(PHOTOS[r.id]) return ""; const rp = window.CAZUELA_PWA && REAL[r.id];
+      if(rp && rp.url) return `<p class="credit">Foto de ejemplo: ${esc(rp.author)} · ${esc(rp.license)} · <a href="${esc(rp.page)}" target="_blank" rel="noopener">Wikimedia Commons</a></p>
+        <div class="actions" style="justify-content:center;margin-bottom:10px">${rp.total>1?`<button class="btn small" type="button" data-realnext="${r.id}">Otra foto</button>`:''}<button class="btn small ghost" type="button" data-realoff="${r.id}">Usar el dibujo</button></div>`;
+      if(window.CAZUELA_PWA && rp && rp.off) return `<div class="actions" style="justify-content:center;margin-bottom:10px"><button class="btn small" type="button" data-realon="${r.id}">Ver foto de ejemplo</button></div>`;
+      return '<p class="hint" style="text-align:center;margin-top:-4px">Ilustración hecha con sus ingredientes. Cuando lo cocines, hazle una foto.</p>'; })()}
     <div class="chips"><span class="chip">${r.min} min</span><span class="chip">${r.kcal} kcal</span><span class="chip">${r.prot} g proteína</span><span class="chip">${eur(servingCost(r))}/ración</span>${vegChip(r)}</div>
     ${fromYest?`<p class="hint">Esta comida son las sobras de la cena del ${DAYS[day-1].toLowerCase()}. Guárdalas en táper en la nevera y caliéntalas.</p>`:''}
     <h3>Ingredientes para ${n} ${n===1?'ración':'raciones'}${twice?' (cena de hoy y comida de mañana)':''}</h3>
@@ -868,6 +930,10 @@ document.addEventListener("click", async e=>{
   if(d.pick){ setSlot(S.plan, +d.day, d.slot, d.pick); save(); closeSheet(); renderAll(); toast("Plato cambiado"); return; }
   if(d.del){ S.custom = S.custom.filter(r=>r.id!==d.del); if(S.plan) S.plan.forEach(day=>slots().forEach(s=>{ if(day[s]===d.del){ const alt=allRecipes().find(r=>eligible(r)); day[s]=alt?alt.id:null; } })); save(); closeSheet(); renderAll(); toast("Receta borrada"); return; }
   if(d.rmphoto){ delete PHOTOS[d.rmphoto]; try{ localStorage.setItem(PHOTO_KEY, JSON.stringify(PHOTOS)); }catch(err){} renderAll(); showRecipe(d.rmphoto, d.day===""?null:+d.day, d.slot||null); toast("Foto quitada"); return; }
+  if(d.realnext || d.realon){ const id=d.realnext||d.realon, r=rec(id), cur=REAL[id]||{}; const idx = d.realnext? (cur.idx||0)+1 : (cur.idx||0);
+    try{ REAL[id] = await findReal(r, idx); saveReal(); }catch(err){ toast("Sin conexión: prueba más tarde"); }
+    renderAll(); reopenRecipe(id); return; }
+  if(d.realoff){ const cur=REAL[d.realoff]||{}; REAL[d.realoff] = {off:true, idx:cur.idx||0}; saveReal(); renderAll(); reopenRecipe(d.realoff); return; }
   if(d.act==="addoffer"){ showOfferForm(); return; }
   if(d.deloffer){ delete S.offers[d.deloffer]; save(); renderAll(); toast("Oferta quitada"); return; }
   if(d.act==="export"){ const txt=JSON.stringify(S); try{ await navigator.clipboard.writeText(txt); toast("Datos copiados"); }catch(err){ openSheet(`<div class="sheet-head"><h2>Tus datos</h2><button class="btn small ghost" type="button" data-act="close" aria-label="Cerrar">✕</button></div><p class="hint">Mantén pulsado, selecciona todo y copia.</p><textarea rows="10" readonly>${esc(txt)}</textarea>`); } return; }
@@ -936,6 +1002,7 @@ Object.keys(S.offers).forEach(id=>{ if(!ing(id) || !offerOf(id)) delete S.offers
 if(window.CAZUELA_PWA){
   fetch("data.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ applyData(d); Object.keys(S.offers).forEach(id=>{ if(!ing(id)||!offerOf(id)) delete S.offers[id]; }); save(); renderProfile(); renderAll(); } }).catch(()=>{});
   if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+  setTimeout(loadRealPhotos, 800); window.addEventListener("online", loadRealPhotos);
 }
 if(!S.weekStart){ S.weekStart = weekMonday(); save(); }
 renderProfile(); renderAll();

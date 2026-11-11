@@ -8,6 +8,11 @@ App de menú semanal para el Lidl de Paiporta (Valencia). Usuario: David, habla 
 - `tools/make_artifact.py`: genera `artifact.html` (versión sin cabecera PWA) para publicar en claude.ai.
 - Artifact en claude.ai: slug `749bc5fa-6ba4-4ba7-94af-cf97860cc784`.
 
+## Imágenes de los platos
+- Por defecto, ilustración generada (`plateSVG`, colores en `LOOK`). Si añades un ingrediente nuevo, añádele color y forma en `LOOK`.
+- En la app instalada, foto de ejemplo de Wikimedia Commons buscada con `PHOTO_Q[idReceta]`. Si añades una receta, añade también su término de búsqueda (nombre del plato en español o inglés).
+- Las fotos propias de David (`cazuela-fotos` en localStorage) siempre tienen prioridad.
+
 ## Formato de DATA / data.json
 ```
 { "version": "AAAA-MM-DD",
