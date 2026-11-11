@@ -24,7 +24,7 @@ Pasillos válidos: Fruta y verdura, Panadería, Carne, Pescado, Huevos y lácteo
 2. En la página del folleto, con JavaScript: `fetch("https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=<slug del folleto>&region_id=0&region_code=0")` y lee `flyer.pages[].altText` y `keyWords` para ver qué hay en cada página.
 3. Para las páginas con productos que encajan con ingredientes de `ING` (o alternativas claras), cambia de página con `history.pushState` a `.../view/flyer/page/N` + `dispatchEvent(new PopStateEvent("popstate"))` y haz zoom de captura para leer precio, precio anterior, tamaño, fechas y si es "Con Lidl Plus". Los números de keyWords son ambiguos: confirma siempre con la imagen.
 4. Actualiza `folleto` en `data.json` y en la constante `DATA` de `index.html` (mismo contenido). Ajusta `prices` si ves un precio normal (sin tachar) distinto del catálogo. Añade `ingredients`/`recipes` solo si hay un producto nuevo de alimentación básica que encaje con cocina casera.
-5. Comprueba la sintaxis (extraer el `<script>` y `node --check`), haz commit y push a `main`.
+5. Comprueba la sintaxis (extraer el `<script>` más largo y `node --check`), haz commit y push a `main`.
 6. `python3 tools/make_artifact.py` y publica `artifact.html` como `index.html` del artifact (publish_files con slug, base_version de get_artifact, modo patch).
 7. Envía a David un resumen corto: las 5–8 ofertas más útiles con precio y fechas, y qué requiere Lidl Plus.
 Si el navegador no está disponible (ordenador apagado o app cerrada), no inventes ofertas: avisa a David de que mande capturas del folleto.

@@ -62,7 +62,7 @@ header.top h1 span{color:var(--accent)}
 .day{margin-bottom:14px}
 .day h2{font-size:1.05rem;margin:0 0 6px;display:flex;justify-content:space-between;align-items:baseline}
 .day h2 small{font-family:var(--body);font-weight:500;color:var(--muted);font-size:.8rem}
-.meal{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 12px 12px 14px;border-left:4px solid var(--accent);margin-bottom:8px}
+.meal{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:12px 12px 12px 14px;border-left:4px solid var(--accent);margin-bottom:8px}
 .meal.cena{border-left-color:var(--saffron)}
 .meal.leftover{border-left-style:dashed;background:var(--bg)}
 .meal .slot{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
@@ -117,6 +117,13 @@ nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--accent
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
 .toast.show{opacity:1}
 [hidden]{display:none!important}
+.thumb{width:58px;height:58px;border-radius:12px;display:block;overflow:hidden;object-fit:cover;background:var(--bg)}
+.thumb svg,.hero svg{width:100%;height:100%;display:block}
+.thumbbtn{border:0;padding:0;background:none;border-radius:12px}
+.hero{width:100%;max-width:260px;aspect-ratio:1/1;margin:8px auto 10px;display:block;border-radius:18px;object-fit:cover;overflow:hidden}
+.rec{justify-content:flex-start}
+.rec > .thumbbtn{flex:none}
+.rec > div{flex:1}
 .ctrl{display:grid;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--line)}
 .ctrl-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .ctrl-label{font-weight:600}
@@ -560,6 +567,7 @@ function renderDays(){
       const fromYest = linked() && sl==="comida" && i>0, cookTwice = linked() && sl==="cena" && i<6;
       const locked = !!S.locks[lockKey(i,sl)];
       return `<div class="card meal ${sl}${fromYest?' leftover':''}">
+        <button class="thumbbtn" type="button" data-open="${r.id}" data-day="${i}" data-slot="${sl}" aria-label="Ver ${esc(r.name)}" tabindex="-1">${dishImg(r,"thumb")}</button>
         <div><div class="slot">${sl==="comida"?"Comida":"Cena"}${locked?' · 📌 fijado':''}</div>
         <button class="name" type="button" data-open="${r.id}" data-day="${i}" data-slot="${sl}">${esc(r.name)}</button>
         <div class="chips">${fromYest?`<span class="chip love">Sobras de la cena del ${DAYS[i-1].toLowerCase()}: solo calentar</span>`:`<span class="chip num">${r.min} min</span>`}${cookTwice?`<span class="chip love">Haz ${S.profile.people*2} raciones</span>`:''}<span class="chip num">${eur(servingCost(r))}/ración</span><span class="chip num">${r.kcal} kcal</span>${vegChip(r)}${r.ings.some(([x])=>offerOf(x))?'<span class="chip offer">Oferta</span>':''}${S.prefs.rec[r.id]===1?'<span class="chip love">♥ Te encanta</span>':''}</div></div>
@@ -618,7 +626,7 @@ function itemHtml(x){
 function renderRecipes(){
   const q = $("#recSearch").value.toLowerCase().trim();
   const list = allRecipes().filter(r=> !q || (r.name+" "+r.ings.map(([id])=>(ing(id)||[""])[0]).join(" ")).toLowerCase().includes(q));
-  $("#recList").innerHTML = list.length ? list.map(r=>`<div class="rec"><div><button class="name" type="button" data-open="${r.id}">${esc(r.name)}</button>
+  $("#recList").innerHTML = list.length ? list.map(r=>`<div class="rec"><button class="thumbbtn" type="button" data-open="${r.id}" aria-label="Ver ${esc(r.name)}" tabindex="-1">${dishImg(r,"thumb")}</button><div><button class="name" type="button" data-open="${r.id}">${esc(r.name)}</button>
     <div class="chips"><span class="chip num">${r.min} min</span><span class="chip num">${eur(servingCost(r))}/ración</span>${vegChip(r)}${r.ings.some(([x])=>offerOf(x))?'<span class="chip offer">Oferta</span>':''}${r.light?'<span class="chip">Ligera</span>':''}${r.custom?'<span class="chip">Tuya</span>':''}${S.prefs.rec[r.id]===1?'<span class="chip love">♥ Te encanta</span>':''}${S.prefs.rec[r.id]===-1?'<span class="chip">No quieres verla</span>':''}${eligible(r)?'':'<span class="chip">Fuera de tu perfil</span>'}</div></div></div>`).join("")
     : `<div class="empty">No hay recetas con «${esc(q)}».</div>`;
 }
@@ -643,6 +651,96 @@ function renderAll(){
   renderSummary(); renderDays(); renderShop(); renderRecipes(); renderCtrlSlots();
 }
 
+/* ---------- Imágenes de los platos ---------- */
+// Ilustración generada a partir de los ingredientes; el usuario puede sustituirla por su foto.
+const LOOK = {
+  pechuga:["#e9c79b","chunk"], muslo:["#c4874c","chunk"], picada:["#8a4b2f","crumb"], lomo:["#d6a175","slab"],
+  chorizo:["#b5452a","round"], costilla:["#9c5a35","slab"], morcilla:["#3d2222","round"], salmon:["#f08a5d","slab"],
+  merluza:["#f3ede2","slab"], gambas:["#f29b7a","curl"], atun:["#c9a47c","crumb"], queso:["#f6d55c","sprinkle"],
+  nata:["#f3ead8","sauce"], mozz:["#fbfaf2","blob"], feta:["#fdfbf0","cube"], tofu:["#efe2bf","cube"],
+  pesto:["#6c9a3a","sauce"], garbanzos:["#e3c27a","round"], lentejas:["#8b6a3e","crumb"], alubias:["#8b2d2d","bean"],
+  tomtrit:["#c8382b","sauce"], coco:["#f1e7cf","sauce"], maiz:["#f2c94c","crumb"], caldo:["#e9c46a","sauce"],
+  arroz:["#fbf6ea","grain"], basmati:["#f6efdc","grain"], pasta:["#f0c869","tube"], espagueti:["#f0c869","line"],
+  cuscus:["#e9cf8f","crumb"], quinoa:["#e5d4ad","crumb"], patata:["#f2d57c","chunk"], cebolla:["#f0e1c9","strip"],
+  tomate:["#e04b3a","chunk"], pimiento:["#d7342a","strip"], pimientov:["#4f8a2b","strip"], calabacin:["#6a9a3e","slice"],
+  zanahoria:["#ee8a2b","crumb"], brocoli:["#3f7d2b","floret"], espinacas:["#2f6b2a","leaf"], ensalada:["#7fb24a","leaf"],
+  champis:["#cdbca3","slice"], limon:["#f7e04b","wedge"], aguacate:["#8fb34a","slice"], pepino:["#8cbf5a","slice"],
+  berenjena:["#5a2d5e","chunk"], judias:["#4c8a32","strip"], anacardos:["#e7cf9c","bean"], huevos:["#ffffff","egg"]
+};
+function rng(seed){ let h=2166136261; for(const c of seed){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return ()=>{ h+=0x6D2B79F5; let t=h; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+function plateSVG(r){
+  const R = rng(r.id+r.name), el=[]; const pos=(rad=29)=>{ const a=R()*Math.PI*2, d=Math.sqrt(R())*rad; return [50+Math.cos(a)*d, 50+Math.sin(a)*d]; };
+  const name = r.name.toLowerCase();
+  const items = r.ings.map(([id,q])=>{ const i=ing(id); const lk=LOOK[id]; if(!i||!lk||(i[5]||"").includes("p")) return null; return {id,q:i[3]==="ud"? q*120 : q, c:lk[0], t:lk[1]}; }).filter(Boolean);
+  const tot = items.reduce((s,x)=>s+x.q,0)||1;
+  const isPaella = /paella|arroz al horno/.test(name), isPizza = items.some(x=>x.id==="masa"), isTortilla = /^tortilla/.test(name), isCrema = /^crema/.test(name);
+  // recipiente
+  if(isPaella){ el.push(`<rect x="2" y="46" width="12" height="8" rx="3" fill="#2b2b2b"/><rect x="86" y="46" width="12" height="8" rx="3" fill="#2b2b2b"/><circle cx="50" cy="50" r="42" fill="#3a3a3a"/><circle cx="50" cy="50" r="38" fill="#e8a33a"/>`); }
+  else if(isPizza){ el.push(`<circle cx="50" cy="50" r="46" fill="#c99a5b"/><circle cx="50" cy="50" r="42" fill="#e9c27d"/><circle cx="50" cy="50" r="37" fill="#c8382b"/>`); }
+  else { el.push(`<circle cx="50" cy="50" r="46" fill="#ffffff" stroke="#dfe5e1" stroke-width="1.5"/><circle cx="50" cy="50" r="37" fill="#f6f6f1"/>`); }
+  if(isCrema){ el.push(`<circle cx="50" cy="50" r="33" fill="#8dbb57"/><circle cx="44" cy="44" r="10" fill="#a7cc77" opacity=".7"/><path d="M38 56 q12 -8 24 0" stroke="#f3ead8" stroke-width="2.5" fill="none"/>`); }
+  if(isTortilla){ el.push(`<circle cx="46" cy="52" r="28" fill="#e6a93a"/><circle cx="46" cy="52" r="24" fill="#f4c95d"/><circle cx="40" cy="46" r="7" fill="#f8d97f" opacity=".7"/>`); }
+  // salsa base
+  const sauce = items.filter(x=>x.t==="sauce");
+  if(/salsa verde/.test(name) && sauce[0]) sauce[0] = Object.assign({}, sauce[0], {c:"#b9c76a"});
+  if(!isPizza && !isCrema && !isTortilla && !/rellena/.test(name) && sauce.length){ el.push(`<circle cx="50" cy="50" r="31" fill="${sauce[0].c}" opacity=".92"/>`); if(sauce[1]) el.push(`<circle cx="54" cy="47" r="18" fill="${sauce[1].c}" opacity=".5"/>`); }
+  // carbohidrato de base
+  items.filter(x=>["grain","tube","line"].includes(x.t)).forEach(x=>{
+    const n = isPaella? 160 : 70;
+    for(let k=0;k<n;k++){ const [px,py]=isPaella? pos(34) : (()=>{ const a=Math.PI*(0.55+R()*0.9), d=Math.sqrt(R())*27; return [50+Math.cos(a)*d, 50+Math.sin(a)*d]; })();
+      const rot=Math.round(R()*180);
+      if(x.t==="grain") el.push(`<ellipse cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" rx="1.6" ry=".8" transform="rotate(${rot} ${px.toFixed(1)} ${py.toFixed(1)})" fill="${isPaella?'#f3c45a':x.c}" stroke="${isPaella?'#d79a2b':'#cfc3a5'}" stroke-width=".35"/>`);
+      else if(x.t==="tube"){ if(k%3) continue; el.push(`<rect x="${(px-3).toFixed(1)}" y="${(py-1.4).toFixed(1)}" width="6" height="2.8" rx="1.2" transform="rotate(${rot} ${px.toFixed(1)} ${py.toFixed(1)})" fill="${x.c}" stroke="#d9a93f" stroke-width=".4"/>`); }
+      else { if(k%4) continue; el.push(`<path d="M${(px-8).toFixed(1)} ${py.toFixed(1)} q4 -4 8 0 t8 0" transform="rotate(${rot} ${px.toFixed(1)} ${py.toFixed(1)})" stroke="${x.c}" stroke-width="1.4" fill="none" stroke-linecap="round"/>`); }
+    }
+  });
+  // resto de ingredientes
+  items.filter(x=>!["grain","tube","line","sauce"].includes(x.t)).forEach(x=>{
+    let n = Math.max(2, Math.min(16, Math.round(x.q/tot*40)));
+    if(x.t==="egg"){ if(isTortilla) return; const [px,py]=pos(16); el.push(`<circle cx="${px}" cy="${py}" r="8" fill="#fff" stroke="#eee" stroke-width=".5"/><circle cx="${px+1}" cy="${py-1}" r="3.4" fill="#f4b41a"/>`); return; }
+    if(isTortilla && ["patata","cebolla","calabacin"].includes(x.id)) return;
+    if(x.id==="picada" && /hamburguesa/.test(name)){ el.push(`<ellipse cx="58" cy="46" rx="17" ry="15" fill="#6f3b22"/><ellipse cx="55" cy="42" rx="10" ry="6" fill="#8a4b2f" opacity=".7"/>`); return; }
+    if(x.id==="picada" && /albóndiga/.test(name)){ for(let k=0;k<6;k++){ const [px,py]=pos(20); el.push(`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="5.5" fill="#8a4b2f" stroke="#5e3019" stroke-width=".6"/><circle cx="${(px-1.5).toFixed(1)}" cy="${(py-1.5).toFixed(1)}" r="1.6" fill="#a5643f"/>`); } return; }
+    if(x.id==="berenjena" && /rellena/.test(name)){ el.push(`<ellipse cx="38" cy="50" rx="11" ry="25" fill="#4a2350"/><ellipse cx="38" cy="50" rx="8" ry="21" fill="#9a5a3a"/><ellipse cx="63" cy="50" rx="11" ry="25" fill="#4a2350"/><ellipse cx="63" cy="50" rx="8" ry="21" fill="#9a5a3a"/>`); return; }
+    if(/rellena/.test(name) && ["picada","tomtrit","cebolla"].includes(x.id)) return;
+    if(isCrema && ["calabacin","patata","cebolla"].includes(x.id)) return;
+    for(let k=0;k<n;k++){
+      const [px,py]=pos(isPizza?32:28), rot=Math.round(R()*180), tf=`transform="rotate(${rot} ${px.toFixed(1)} ${py.toFixed(1)})"`, X=px.toFixed(1), Y=py.toFixed(1);
+      switch(x.t){
+        case "chunk": el.push(`<rect x="${(px-3).toFixed(1)}" y="${(py-2.5).toFixed(1)}" width="6" height="5" rx="1.6" ${tf} fill="${x.c}" stroke="rgba(0,0,0,.12)" stroke-width=".4"/>`); break;
+        case "slab": if(k>1) break; el.push(`<rect x="${(px-9).toFixed(1)}" y="${(py-5).toFixed(1)}" width="18" height="10" rx="4" ${tf} fill="${x.c}" stroke="rgba(0,0,0,.12)" stroke-width=".5"/><path d="M${(px-5).toFixed(1)} ${Y} h10" ${tf} stroke="rgba(255,255,255,.5)" stroke-width=".8"/>`); break;
+        case "crumb": for(let j=0;j<3;j++){ const a=px+(R()-.5)*6, b=py+(R()-.5)*6; el.push(`<circle cx="${a.toFixed(1)}" cy="${b.toFixed(1)}" r="${(0.9+R()).toFixed(1)}" fill="${x.c}"/>`); } break;
+        case "round": el.push(`<circle cx="${X}" cy="${Y}" r="2.6" fill="${x.c}" stroke="rgba(0,0,0,.15)" stroke-width=".4"/>`); break;
+        case "bean": el.push(`<ellipse cx="${X}" cy="${Y}" rx="2.8" ry="1.7" ${tf} fill="${x.c}"/>`); break;
+        case "cube": el.push(`<rect x="${(px-2.4).toFixed(1)}" y="${(py-2.4).toFixed(1)}" width="4.8" height="4.8" rx=".8" ${tf} fill="${x.c}" stroke="#e2d7b8" stroke-width=".4"/>`); break;
+        case "blob": el.push(`<circle cx="${X}" cy="${Y}" r="4.2" fill="${x.c}" opacity=".95"/>`); break;
+        case "strip": el.push(`<rect x="${(px-4.5).toFixed(1)}" y="${(py-1).toFixed(1)}" width="9" height="2" rx="1" ${tf} fill="${x.c}"/>`); break;
+        case "slice": el.push(`<circle cx="${X}" cy="${Y}" r="3.4" fill="${x.c}"/><circle cx="${X}" cy="${Y}" r="2.2" fill="#eef0d8" opacity=".75"/>`); break;
+        case "leaf": el.push(`<ellipse cx="${X}" cy="${Y}" rx="4.6" ry="2.4" ${tf} fill="${x.c}"/><path d="M${(px-3.5).toFixed(1)} ${Y} h7" ${tf} stroke="rgba(255,255,255,.35)" stroke-width=".5"/>`); break;
+        case "floret": el.push(`<rect x="${(px-.8).toFixed(1)}" y="${Y}" width="1.6" height="4" fill="#7fae55"/><circle cx="${(px-1.6).toFixed(1)}" cy="${Y}" r="2" fill="${x.c}"/><circle cx="${(px+1.6).toFixed(1)}" cy="${Y}" r="2" fill="${x.c}"/><circle cx="${X}" cy="${(py-1.6).toFixed(1)}" r="2.2" fill="${x.c}"/>`); break;
+        case "curl": el.push(`<path d="M${(px-3).toFixed(1)} ${Y} a3 3 0 1 1 6 0" ${tf} stroke="${x.c}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`); break;
+        case "sprinkle": for(let j=0;j<4;j++){ const a=px+(R()-.5)*8, b=py+(R()-.5)*8; el.push(`<rect x="${a.toFixed(1)}" y="${b.toFixed(1)}" width="2.2" height=".7" transform="rotate(${Math.round(R()*180)} ${a.toFixed(1)} ${b.toFixed(1)})" fill="${x.c}"/>`); } break;
+        case "wedge": if(k>0) break; el.push(`<path d="M${X} ${Y} l7 0 a7 7 0 0 1 -7 7 z" fill="${x.c}" stroke="#e8c92f" stroke-width=".5"/>`); break;
+      }
+    }
+  });
+  if(items.some(x=>x.id==="tortillas")) el.push(`<path d="M22 64 a20 20 0 0 1 40 0 z" fill="#ead9a6" stroke="#d2bb7c" stroke-width=".8"/><path d="M40 70 a20 20 0 0 1 40 0 z" fill="#efe0b4" stroke="#d2bb7c" stroke-width=".8"/>`);
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración de ${esc(r.name)}">${el.join("")}</svg>`;
+}
+const PHOTO_KEY = "cazuela-fotos";
+let PHOTOS = {}; try{ PHOTOS = JSON.parse(localStorage.getItem(PHOTO_KEY)||"{}"); }catch(e){}
+function dishImg(r, cls){ return PHOTOS[r.id] ? `<img class="${cls}" src="${PHOTOS[r.id]}" alt="Tu foto de ${esc(r.name)}">` : `<span class="${cls}">${plateSVG(r)}</span>`; }
+function savePhoto(id, file){
+  const img = new Image(); const url = URL.createObjectURL(file);
+  img.onload = ()=>{ const s=480, c=document.createElement("canvas"); const k=Math.min(img.width,img.height); c.width=s; c.height=s;
+    c.getContext("2d").drawImage(img,(img.width-k)/2,(img.height-k)/2,k,k,0,0,s,s); URL.revokeObjectURL(url);
+    PHOTOS[id] = c.toDataURL("image/jpeg",0.72);
+    try{ localStorage.setItem(PHOTO_KEY, JSON.stringify(PHOTOS)); toast("Foto guardada"); }catch(e){ delete PHOTOS[id]; toast("No cabe más fotos en el móvil: quita alguna"); }
+    renderAll(); const sh=document.querySelector("#sheet [data-photo]"); if(sh) showRecipe(id, sh.dataset.day===""?null:+sh.dataset.day, sh.dataset.slot||null); };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); toast("No se ha podido leer esa imagen"); };
+  img.src = url;
+}
+
 /* ---------- Hojas ---------- */
 function openSheet(html){ $("#sheet").innerHTML = html; $("#overlay").classList.add("open"); $("#sheet").scrollTop=0; const f=$("#sheet").querySelector("button,input"); if(f) f.focus(); }
 function closeSheet(){ $("#overlay").classList.remove("open"); }
@@ -650,6 +748,13 @@ function showRecipe(id, day, slot){
   const r = rec(id); const twice = day!=null && linked() && slot==="cena" && day<6; const n = S.profile.people*(twice?2:1);
   const fromYest = day!=null && linked() && slot==="comida" && day>0; const lk = day!=null? lockKey(day,slot) : null;
   openSheet(`<div class="sheet-head"><h2>${esc(r.name)}</h2><button class="btn small ghost" type="button" data-act="close" aria-label="Cerrar">✕</button></div>
+    ${dishImg(r,"hero")}
+    <div class="actions" style="justify-content:center;margin-bottom:10px">
+      <label class="btn small" for="photoIn">📷 ${PHOTOS[r.id]?'Cambiar foto':'Añadir tu foto'}</label>
+      <input id="photoIn" type="file" accept="image/*" hidden data-photo="${r.id}" data-day="${day==null?'':day}" data-slot="${slot||''}">
+      ${PHOTOS[r.id]?`<button class="btn small ghost danger" type="button" data-rmphoto="${r.id}" data-day="${day==null?'':day}" data-slot="${slot||''}">Quitar foto</button>`:''}
+    </div>
+    ${PHOTOS[r.id]?'':'<p class="hint" style="text-align:center;margin-top:-4px">Ilustración hecha con sus ingredientes. Cuando lo cocines, hazle una foto.</p>'}
     <div class="chips"><span class="chip">${r.min} min</span><span class="chip">${r.kcal} kcal</span><span class="chip">${r.prot} g proteína</span><span class="chip">${eur(servingCost(r))}/ración</span>${vegChip(r)}</div>
     ${fromYest?`<p class="hint">Esta comida son las sobras de la cena del ${DAYS[day-1].toLowerCase()}. Guárdalas en táper en la nevera y caliéntalas.</p>`:''}
     <h3>Ingredientes para ${n} ${n===1?'ración':'raciones'}${twice?' (cena de hoy y comida de mañana)':''}</h3>
@@ -762,6 +867,7 @@ document.addEventListener("click", async e=>{
   if(d.swap!=null){ showSwap(+d.swap, d.slot); return; }
   if(d.pick){ setSlot(S.plan, +d.day, d.slot, d.pick); save(); closeSheet(); renderAll(); toast("Plato cambiado"); return; }
   if(d.del){ S.custom = S.custom.filter(r=>r.id!==d.del); if(S.plan) S.plan.forEach(day=>slots().forEach(s=>{ if(day[s]===d.del){ const alt=allRecipes().find(r=>eligible(r)); day[s]=alt?alt.id:null; } })); save(); closeSheet(); renderAll(); toast("Receta borrada"); return; }
+  if(d.rmphoto){ delete PHOTOS[d.rmphoto]; try{ localStorage.setItem(PHOTO_KEY, JSON.stringify(PHOTOS)); }catch(err){} renderAll(); showRecipe(d.rmphoto, d.day===""?null:+d.day, d.slot||null); toast("Foto quitada"); return; }
   if(d.act==="addoffer"){ showOfferForm(); return; }
   if(d.deloffer){ delete S.offers[d.deloffer]; save(); renderAll(); toast("Oferta quitada"); return; }
   if(d.act==="export"){ const txt=JSON.stringify(S); try{ await navigator.clipboard.writeText(txt); toast("Datos copiados"); }catch(err){ openSheet(`<div class="sheet-head"><h2>Tus datos</h2><button class="btn small ghost" type="button" data-act="close" aria-label="Cerrar">✕</button></div><p class="hint">Mantén pulsado, selecciona todo y copia.</p><textarea rows="10" readonly>${esc(txt)}</textarea>`); } return; }
@@ -790,6 +896,7 @@ document.addEventListener("change", e=>{
   const t=e.target;
   if(t.classList.contains("budget-range")){ const v=+t.value; if(v!==S.profile.budget){ S.profile.budget=v; applyLimits("Presupuesto: "+v+" €"); } return; }
   if(t.dataset.check){ if(t.checked) S.checked[t.dataset.check]=true; else delete S.checked[t.dataset.check]; save(); renderShop(); }
+  if(t.dataset.photo && t.files && t.files[0]){ savePhoto(t.dataset.photo, t.files[0]); }
   if(t.id==="ofIng"){ fillOfferHint(); }
   if(t.classList.contains("iSel")){ t.closest(".ingrow").querySelector(".newing").hidden = t.value!=="__new"; }
 });
