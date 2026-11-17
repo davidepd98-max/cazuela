@@ -98,7 +98,7 @@ input[type=text],input[type=number],select,textarea{border:1px solid var(--line)
 .section h2{font-size:1.1rem;margin-bottom:10px}
 .hint{color:var(--muted);font-size:.82rem}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:5}
-nav.tabs .in{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:640px;width:100%}
+nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:640px;width:100%}
 nav.tabs button{border:0;background:none;padding:8px 4px;border-radius:10px;font-size:.78rem;font-weight:600;color:var(--muted);display:grid;justify-items:center;gap:2px}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
@@ -117,6 +117,21 @@ nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--accent
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
 .toast.show{opacity:1}
 [hidden]{display:none!important}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 10px}
+.seg button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 6px;font-weight:600;font-size:.88rem}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+details.have summary{cursor:pointer;font-weight:600;padding:6px 0}
+.sug{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px;margin-bottom:10px;align-items:start}
+.sug .name{background:none;border:0;padding:0;text-align:left;font-weight:700;display:block}
+.why{margin:6px 0 0;font-size:.82rem;color:var(--muted)}
+.quiz{border:2px solid var(--accent)}
+.quiz-q{font-family:var(--display);font-size:1.25rem;font-weight:600;margin:4px 0 12px}
+.quiz-a{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.pick-day{margin-bottom:8px}
+.pick-day > b{display:block;margin:8px 0 4px}
+.alt:disabled{opacity:.5}
+.pref[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#learnedBox p{margin:4px 0}
 .thumb{width:58px;height:58px;border-radius:12px;display:block;overflow:hidden;object-fit:cover;background:var(--bg)}
 .thumb svg,.hero svg{width:100%;height:100%;display:block}
 .thumbbtn{border:0;padding:0;background:none;border-radius:12px}
@@ -169,6 +184,22 @@ nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--accent
   </section>
 
   <!-- COMPRA -->
+  <section id="view-cocinar" hidden>
+    <div id="quizBox"></div>
+    <div class="card section">
+      <h2>¿Qué cocino?</h2>
+      <div class="seg" role="group" aria-label="Cómo elegir">
+        <button type="button" data-mode="tengo">Con lo que tengo</button>
+        <button type="button" data-mode="gusta">Lo que me gusta</button>
+        <button type="button" data-mode="nuevo">Algo nuevo</button>
+      </div>
+      <details class="have"><summary id="haveSum">Lo que tengo en casa</summary><div id="haveChips"></div></details>
+    </div>
+    <div id="sugList"></div>
+    <div class="actions" style="margin-bottom:14px"><button class="btn" type="button" data-act="moresug">Otras ideas</button></div>
+    <div class="card section" id="learnedBox"></div>
+  </section>
+
   <section id="view-compra" hidden>
     <div class="card summary" id="shopSummary"></div>
     <div class="card section" id="offersBox"></div>
@@ -259,6 +290,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--accent
 <nav class="tabs" aria-label="Secciones">
   <div class="in">
     <button type="button" data-tab="semana"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Semana</button>
+    <button type="button" data-tab="cocinar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11h14v5a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M17 13h4M8 4c0 1.5 1 1.5 1 3M12 4c0 1.5 1 1.5 1 3"/></svg>Cocinar</button>
     <button type="button" data-tab="compra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>Compra</button>
     <button type="button" data-tab="recetas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM4 19a2 2 0 0 0 2 2h12"/><path d="M9 7h6M9 11h6"/></svg>Recetas</button>
     <button type="button" data-tab="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Perfil</button>
@@ -391,7 +423,7 @@ const DATA = {version:"2026-11-09", prices:{}, ingredients:{}, recipes:[], folle
 const KEY = "cazuela-lidl-v1";
 const DEFAULT = {
   profile:{budget:60,people:2,super:"Lidl Paiporta",comida:true,cena:true,diet:"omni",gluten:false,lact:false,nuts:false,goal:"eq",dislike:"",horno:true,air:true},
-  plan:null, checked:{}, custom:[], customIng:{}, prefs:{ing:{}, rec:{}}, have:{}, offers:{}, locks:{}, prevPlan:null, weekStart:null
+  plan:null, checked:{}, custom:[], customIng:{}, prefs:{ing:{}, rec:{}}, have:{}, offers:{}, locks:{}, taste:{ing:{},style:{},rec:{}}, history:[], asked:{}, rated:{}, saved:[], prevPlan:null, weekStart:null
 };
 let S = load();
 S.profile.super = "Lidl Paiporta";
@@ -402,8 +434,8 @@ function load(){
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
 const ing = id => ING[id] || S.customIng[id];
-const allRecipes = () => BASE_RECIPES.concat(S.custom);
-const rec = id => allRecipes().find(r=>r.id===id);
+const allRecipes = () => BASE_RECIPES.concat(S.custom, (S.saved||[]).map(comboFromId).filter(Boolean));
+const rec = id => allRecipes().find(r=>r.id===id) || (id && String(id).startsWith("g_")? comboFromId(id) : undefined);
 const mult = () => SUPERS[S.profile.super] || 1;
 const eur = v => v.toLocaleString("es-ES",{style:"currency",currency:"EUR"});
 const DAYS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
@@ -423,11 +455,7 @@ function eligible(r){
   if(r.ings.some(([id])=>S.prefs.ing[id]===-1)) return false;
   return true;
 }
-function likeScore(r){
-  let sc = r.ings.reduce((s,[id])=>s+(S.prefs.ing[id]===1?1:0),0);
-  if(S.prefs.rec[r.id]===1) sc += 3;
-  return sc;
-}
+function likeScore(r){ return tasteScore(r); }
 function likedNames(r){ return r.ings.filter(([id])=>S.prefs.ing[id]===1).map(([id])=>ing(id)[0].split(" ")[0].toLowerCase()); }
 function todayISO(){ const d=new Date(), z=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate()); }
 function offerOf(id){ const o=S.offers[id]; return o && o.until>=todayISO() ? o : null; }
@@ -489,6 +517,7 @@ function generate(){
   if(S.weekStart && S.weekStart!==weekMonday()) S.locks = {};
   const keep = S.plan? Object.keys(S.locks).map(k=>{ const [d,slot]=k.split("-"); return [+d,slot,S.plan[+d] && S.plan[+d][slot]]; }).filter(x=>x[2] && rec(x[2]) && sl.includes(x[1])) : [];
   let best=null, bestScore=Infinity;
+  const recPen = {}; pool.forEach(id=>recPen[id]=recencyPenalty(rec(id)));
   for(let t=0;t<400;t++){
     let picks=[];
     while(picks.length<total) picks = picks.concat(shuffle(pool.slice()));
@@ -501,7 +530,8 @@ function generate(){
     if(goal==="prot") score -= st.prot*0.15;
     score += variety(plan);
     score -= planIds(plan).reduce((s,id)=>s+rec(id).ings.filter(([x])=>offerOf(x)).length,0)*1.5;
-    score -= planIds(plan).reduce((s,id)=>s+Math.min(2,likeScore(rec(id))),0)*4;
+    score -= planIds(plan).reduce((s,id)=>s+Math.max(-3,Math.min(3,likeScore(rec(id)))),0)*3;
+    score += cookIds(plan).reduce((s,id)=>s+(recPen[id]||0),0)*1.5;
     if(score<bestScore){ bestScore=score; best=plan; }
   }
   if(S.plan) S.prevPlan = {plan:S.plan, checked:S.checked, weekStart:S.weekStart};
@@ -562,7 +592,7 @@ function renderSummary(){
 function renderDays(){
   const el = $("#days");
   if(!S.plan){ el.innerHTML=""; return; }
-  el.innerHTML = S.plan.map((d,i)=>{
+  el.innerHTML = ratingCardHtml() + S.plan.map((d,i)=>{
     const dayCost = slots().reduce((s,sl)=>{ const r=rec(d[sl]); return s+(r?servingCost(r)*S.profile.people:0); },0);
     const date = S.weekStart? new Date(new Date(S.weekStart).getTime()+i*864e5) : null;
     const isToday = date && date.toDateString()===new Date().toDateString();
@@ -659,7 +689,7 @@ function renderPrefs(){
 }
 function renderAll(){
   $("#superLabel").textContent = `${S.profile.people} pers. · ${S.profile.super}`;
-  renderSummary(); renderDays(); renderShop(); renderRecipes(); renderCtrlSlots(); renderCredits();
+  renderSummary(); renderDays(); renderShop(); renderRecipes(); renderCtrlSlots(); renderCredits(); renderCook();
 }
 
 /* ---------- Imágenes de los platos ---------- */
@@ -799,6 +829,281 @@ async function loadRealPhotos(){
   realBusy = false; if(changed) renderAll();
 }
 
+/* ---------- Combinaciones de platos ---------- */
+// Proteína + forma de cocinar + guarnición. Cantidades por persona.
+const PROT = {
+  pollo:{id:"pechuga",q:150,name:"Pollo",el:"el pollo",kind:"carne"},
+  contramuslo:{id:"muslo",q:170,name:"Contramuslos",el:"los contramuslos",kind:"carne"},
+  cerdo:{id:"lomo",q:150,name:"Lomo de cerdo",el:"el lomo",kind:"carne"},
+  picada:{id:"picada",q:130,name:"Carne picada",el:"la carne picada",kind:"picada"},
+  merluza:{id:"merluza",q:170,name:"Merluza",el:"la merluza",kind:"pescado"},
+  salmon:{id:"salmon",q:140,name:"Salmón",el:"el salmón",kind:"pescado"},
+  gambas:{id:"gambas",q:110,name:"Gambas",el:"las gambas",kind:"marisco"},
+  huevos:{id:"huevos",q:2,name:"Huevos",el:"los huevos",kind:"huevo"},
+  tofu:{id:"tofu",q:150,name:"Tofu",el:"el tofu",kind:"veg"},
+  garbanzos:{id:"garbanzos",q:180,name:"Garbanzos",el:"los garbanzos",kind:"legumbre"},
+  lentejas:{id:"lentejas",q:200,name:"Lentejas",el:"las lentejas",kind:"legumbre"},
+  alubias:{id:"alubias",q:200,name:"Alubias rojas",el:"las alubias",kind:"legumbre"}
+};
+const STYLES = {
+  plancha:{label:"a la plancha", kinds:["carne","pescado","marisco","veg"], min:15, light:true, fresh:true, extra:[["limon",15],["ajo",3],["aceite",8]],
+    steps:["Seca bien {el} y sálalo.","Hazlo en la plancha muy caliente, de 2 a 4 minutos por cada lado según el grosor.","Termina con ajo picado y unas gotas de limón."]},
+  tomate:{label:"en salsa de tomate", kinds:["carne","picada","pescado","huevo","legumbre","veg"], min:25, extra:[["tomtrit",120],["cebolla",40],["ajo",4],["aceite",10]],
+    steps:["Pocha la cebolla y el ajo picados 6 minutos.","Añade el tomate triturado con sal y una pizca de azúcar y cuece 10 minutos.","Incorpora {el} y cocínalo en la salsa hasta que esté hecho (si son huevos, cuájalos encima con la sartén tapada)."]},
+  ajillo:{label:"al ajillo", kinds:["carne","pescado","marisco"], min:15, extra:[["ajo",8],["aceite",14],["pimenton",1]],
+    steps:["Lamina los ajos y dóralos a fuego suave en el aceite.","Sube el fuego y añade {el} con sal.","Cocina hasta que esté hecho y termina con una pizca de pimentón."]},
+  curry:{label:"al curry", kinds:["carne","pescado","marisco","legumbre","veg"], min:25, extra:[["coco",70],["cebolla",40],["curry",3],["aceite",8]],
+    steps:["Sofríe la cebolla picada 5 minutos.","Añade el curry, remueve medio minuto y echa la leche de coco.","Incorpora {el} y cuece a fuego suave de 8 a 10 minutos."]},
+  limon:{label:"al limón", kinds:["carne","pescado","veg"], min:20, light:true, extra:[["limon",30],["ajo",5],["aceite",8]],
+    steps:["Dora {el} en la sartén con sal.","Añade ajo picado y el zumo de medio limón y deja reducir 2 minutos.","Sirve con ralladura de limón por encima."]},
+  horno:{label:"al horno", kinds:["carne","pescado"], min:35, need:["horno","air"], extra:[["cebolla",50],["pimiento",0.3],["aceite",10]],
+    steps:["Precalienta el horno a 200 °C (o la freidora de aire a 190 °C).","Pon {el} sobre la cebolla y el pimiento en tiras, con sal y aceite.","Hornea de 15 a 25 minutos según la pieza, hasta que esté dorado."]},
+  wok:{label:"salteado", prefix:"Salteado de", kinds:["carne","marisco","veg"], min:20, extra:[["soja",15],["pimiento",0.4],["cebolla",40],["aceite",8]],
+    steps:["Corta {el} y las verduras en tiras.","Saltea {el} a fuego muy fuerte 3 minutos y reserva.","Saltea las verduras, junta todo de nuevo y añade la soja."]},
+  pimenton:{label:"al pimentón", kinds:["carne","pescado","legumbre"], min:20, extra:[["pimenton",3],["ajo",4],["aceite",10]],
+    steps:["Dora {el} con sal en el aceite.","Aparta la sartén del fuego, añade ajo y pimentón y remueve 20 segundos sin que se queme.","Vuelve al fuego con un chorrito de agua para ligar la salsa."]},
+  guiso:{label:"guisado", prefix:"Guiso de", kinds:["carne","legumbre"], min:40, lunch:true, noSide:true, extra:[["patata",150],["zanahoria",50],["cebolla",40],["tomtrit",60],["pimenton",2],["aceite",10]],
+    steps:["Sofríe la cebolla y la zanahoria picadas 8 minutos.","Añade el pimentón, el tomate y {el}, y rehoga 2 minutos.","Incorpora la patata chascada, cubre con agua y cuece de 20 a 25 minutos."]}
+};
+const SIDES = {
+  arroz:{name:"arroz", ings:[["basmati",75]], min:15, step:"Cuece el arroz según el paquete."},
+  patatas:{name:"patatas", ings:[["patata",200]], min:20, step:"Cuece o asa las patatas en dados hasta que estén tiernas."},
+  cuscus:{name:"cuscús", ings:[["cuscus",70]], min:5, step:"Hidrata el cuscús con el mismo volumen de agua hirviendo 5 minutos."},
+  pasta:{name:"pasta", ings:[["pasta",90]], min:12, step:"Cuece la pasta en agua con sal."},
+  quinoa:{name:"quinoa", ings:[["quinoa",70]], min:15, step:"Cuece la quinoa 15 minutos y escúrrela."},
+  ensalada:{name:"ensalada", ings:[["ensalada",70],["tomate",80]], min:5, step:"Prepara la ensalada con el tomate y alíñala."},
+  verduras:{name:"verduras salteadas", ings:[["calabacin",0.4],["pimientov",0.4]], min:8, step:"Saltea el calabacín y el pimiento verde en tiras 6 minutos."},
+  brocoli:{name:"brócoli", ings:[["brocoli",130]], min:6, step:"Cuece el brócoli al vapor 5 minutos."},
+  judias:{name:"judías verdes", ings:[["judias",150]], min:12, step:"Cuece las judías verdes 10 minutos y saltéalas con un poco de ajo."}
+};
+const SIDE_OK = {
+  plancha:["patatas","ensalada","verduras","brocoli","arroz","quinoa","judias"], tomate:["arroz","pasta","patatas","cuscus"],
+  ajillo:["patatas","arroz","pasta","ensalada"], curry:["arroz","cuscus","quinoa"], limon:["arroz","cuscus","verduras","ensalada","patatas"],
+  horno:["patatas","verduras","brocoli","ensalada"], wok:["arroz","pasta"], pimenton:["patatas","arroz","judias","verduras"], guiso:[null]
+};
+// kcal y g de proteína por 100 g/ml, o por unidad si el ingrediente va en "ud"
+const NUT = {pechuga:[110,23],muslo:[180,19],picada:[250,17],lomo:[140,22],chorizo:[450,24],costilla:[280,17],morcilla:[380,14],salmon:[200,20],merluza:[85,17],gambas:[85,19],atun:[200,25],huevos:[75,6.5],queso:[400,27],nata:[195,2],mozz:[250,18],feta:[260,14],tofu:[130,13],pesto:[500,5],masa:[1100,30],garbanzos:[120,7],lentejas:[100,8],alubias:[100,7],tomtrit:[30,1.2],coco:[180,2],maiz:[80,2.5],caldo:[5,.3],arroz:[350,7],basmati:[350,8],pasta:[355,12],espagueti:[355,12],cuscus:[360,12],quinoa:[370,14],tortillas:[120,3.5],patata:[80,2],cebolla:[40,1],ajo:[150,6],tomate:[20,1],pimiento:[45,1.5],pimientov:[20,1],calabacin:[60,4],zanahoria:[40,1],brocoli:[35,3],espinacas:[25,3],ensalada:[18,1.5],champis:[22,3],limon:[30,.5],aguacate:[240,3],pepino:[45,2],anacardos:[580,18],aceite:[900,0],soja:[60,8],judias:[30,2],berenjena:[75,3],curry:[300,12],pimenton:[300,14],comino:[375,18],oregano:[270,9],paellero:[200,5]};
+function nutrition(ings){
+  let k=0,p=0; ings.forEach(([id,q])=>{ const n=NUT[id], i=ing(id); if(!n||!i) return; const f = i[3]==="ud"? q : q/100; k+=n[0]*f; p+=n[1]*f; });
+  return {kcal:Math.round(k/10)*10, prot:Math.round(p)};
+}
+const COMBO_CACHE = new Map();
+function comboFromId(id){
+  if(COMBO_CACHE.has(id)) return COMBO_CACHE.get(id);
+  const [, pk, sk, sd] = id.split("_"); const P=PROT[pk], St=STYLES[sk], Sd = sd && sd!=="x" ? SIDES[sd] : null;
+  if(!P || !St) return null;
+  const ingsMap = new Map(); const add=(i,q)=>ingsMap.set(i,(ingsMap.get(i)||0)+q);
+  add(P.id,P.q); St.extra.forEach(([i,q])=>add(i,q)); if(Sd) Sd.ings.forEach(([i,q])=>add(i,q));
+  const ings=[...ingsMap.entries()];
+  const lower = P.name.charAt(0).toLowerCase()+P.name.slice(1);
+  const name = (St.prefix? `${St.prefix} ${lower}` : `${P.name} ${St.label}`) + (Sd? ` con ${Sd.name}` : "");
+  const steps = (Sd? [Sd.step] : []).concat(St.steps.map(x=>x.replace(/\{el\}/g,P.el)));
+  const n = nutrition(ings);
+  const r = {id, gen:true, name, min: St.min + (Sd? Math.max(0, Sd.min-10) : 0), kcal:n.kcal, prot:n.prot, ings, steps,
+    style:sk, main:pk, light: !!St.light && P.kind!=="legumbre", lunch: !!St.lunch, fresh: !!St.fresh, need: St.need};
+  COMBO_CACHE.set(id, r); return r;
+}
+function allCombos(){
+  const out=[];
+  Object.entries(PROT).forEach(([pk,P])=>Object.entries(STYLES).forEach(([sk,St])=>{
+    if(!St.kinds.includes(P.kind)) return;
+    (SIDE_OK[sk]||[]).forEach(sd=>{
+      if(P.kind==="legumbre" && sd && !["arroz","ensalada","verduras","cuscus"].includes(sd)) return;
+      const c = comboFromId(`g_${pk}_${sk}_${sd||"x"}`); if(c) out.push(c);
+    });
+  }));
+  return out;
+}
+// Estilo y proteína de cualquier receta (también las de la lista fija)
+const STYLE_WORDS = [["curry","curry"],["plancha","plancha"],["ajillo","ajillo"],["limón","limon"],["horno","horno"],["freidora","horno"],["salteado","wok"],["wok","wok"],["pimentón","pimenton"],
+  ["estofad","guiso"],["riojana","guiso"],["guiso","guiso"],["boloñesa","tomate"],["tomate","tomate"],["albóndiga","tomate"],["chili","tomate"],["ensalada","ensalada"],["tortilla","huevo"],["revuelto","huevo"],["crema","crema"],["paella","arroz"],["arroz","arroz"],["pizza","pizza"],["pesto","pasta"],["pasta","pasta"],["espagueti","pasta"],["macarrones","pasta"],["fajitas","wok"],["pisto","verdura"],["rellen","horno"],["hamburguesa","plancha"]];
+const STYLE_NAMES = {plancha:"a la plancha",tomate:"con tomate",ajillo:"al ajillo",curry:"al curry",limon:"al limón",horno:"al horno",wok:"salteado",pimenton:"al pimentón",guiso:"guisado",ensalada:"en ensalada",huevo:"en tortilla o revuelto",crema:"en crema",arroz:"con arroz",pizza:"en pizza",pasta:"con pasta",verdura:"con verduras"};
+function styleOf(r){ if(r.style) return r.style; const n=r.name.toLowerCase(); const m=STYLE_WORDS.find(([w])=>n.includes(w)); return m? m[1] : "otro"; }
+const MAIN_NAMES = {pollo:"pollo",carne:"carne",cerdo:"cerdo",pasta:"pasta",pescado:"pescado",marisco:"marisco",legumbre:"legumbres",huevo:"huevo",contramuslo:"pollo",picada:"carne",merluza:"pescado",salmon:"pescado",gambas:"marisco",huevos:"huevo",tofu:"tofu",garbanzos:"legumbres",lentejas:"legumbres",alubias:"legumbres"};
+function mainKey(r){ const m = r.gen? r.main : mainOf(r); return MAIN_NAMES[m] || m; }
+
+/* ---------- Gustos aprendidos ---------- */
+function taste(){ if(!S.taste) S.taste={ing:{},style:{},rec:{}}; return S.taste; }
+function tasteScore(r){
+  const T=taste(); let sc = (T.rec[r.id]||0) + (T.style[styleOf(r)]||0)*0.8;
+  r.ings.forEach(([id])=>{ sc += (T.ing[id]||0)*0.5 + (S.prefs.ing[id]===1? 1.2 : 0); });
+  if(S.prefs.rec[r.id]===1) sc += 3;
+  return sc;
+}
+function daysAgo(iso){ return Math.round((new Date(todayISO()+"T12:00") - new Date(iso+"T12:00"))/864e5); }
+function lastCooked(pred){ return (S.history||[]).filter(h=>h.cooked!==false && rec(h.rid) && pred(rec(h.rid))).sort((a,b)=>b.date.localeCompare(a.date))[0]; }
+function recencyPenalty(r){
+  const H=(S.history||[]).filter(h=>h.cooked!==false); let pen=0; const st=styleOf(r), mk=mainKey(r);
+  H.forEach(h=>{ const hr=rec(h.rid); if(!hr) return; const d=daysAgo(h.date); if(d>21) return;
+    if(h.rid===r.id) pen += d<=10? 6 : 3;
+    else if(mainKey(hr)===mk && styleOf(hr)===st) pen += d<=10? 3 : 1;
+    else if(mainKey(hr)===mk && d<=3) pen += 1; });
+  return pen;
+}
+function learn(r, val){
+  const T=taste(), st=styleOf(r), mains=r.ings.slice(0,2).map(([id])=>id);
+  const bump=(o,k,v)=>{ o[k]=Math.max(-4,Math.min(4,(o[k]||0)+v)); };
+  if(val===2){ bump(T.rec,r.id,2); bump(T.style,st,1); mains.forEach(i=>bump(T.ing,i,0.5)); if(T.rec[r.id]>=3) S.prefs.rec[r.id]=1; }
+  if(val===1){ bump(T.rec,r.id,0.5); bump(T.style,st,0.3); }
+  if(val===-1){ S.prefs.rec[r.id]=-1; bump(T.style,st,-1); mains.forEach(i=>bump(T.ing,i,-0.3)); }
+  if(r.gen && val>0 && !(S.saved||[]).includes(r.id)) (S.saved=S.saved||[]).push(r.id);
+}
+function logCooked(r, val, date){
+  (S.history=S.history||[]).push({rid:r.id, date: date||todayISO(), val, cooked: val!==null});
+  if(S.history.length>300) S.history = S.history.slice(-300);
+  if(val!==null && val!==undefined) learn(r,val);
+  save();
+}
+
+/* ---------- Preguntas para conocerte ---------- */
+const SHORT = {pechuga:"pollo",muslo:"contramuslos",lomo:"lomo de cerdo",picada:"carne picada",costilla:"costilla",salmon:"salmón",merluza:"merluza",gambas:"gambas",atun:"atún",huevos:"huevos",tofu:"tofu",garbanzos:"garbanzos",lentejas:"lentejas",alubias:"alubias",basmati:"arroz",arroz:"arroz",pasta:"macarrones",espagueti:"espaguetis",tomtrit:"tomate triturado",coco:"leche de coco",queso:"queso",masa:"masa de pizza",tortillas:"tortillas",pimiento:"pimiento rojo",pimientov:"pimiento verde",judias:"judías verdes",champis:"champiñones",ensalada:"ensalada",patata:"patatas",cebolla:"cebolla",zanahoria:"zanahoria"};
+const BRANDS = / (Milbona|Combino|Nixe|Vemondo|Vitasia|Eridanous|Kania|Primadonna|Alesto|Baresa|Chef Select|Tastino)\b/g;
+function cleanName(id){ const i=ing(id); return i? i[0].replace(/ \(.*\)$/,"").replace(BRANDS,"") : id; }
+function shortName(id){ return SHORT[id] || cleanName(id).toLowerCase(); }
+function gusta(el){ return (/^(los|las) /.test(el)? "¿Te gustan " : "¿Te gusta ") + el + "?"; }
+const QUESTIONS = [].concat(
+  Object.entries(PROT).map(([k,P])=>({key:"p_"+k, text:gusta(P.el), ids:[P.id].concat(k==="pollo"?["muslo"]:k==="cerdo"?["costilla"]:[])})),
+  Object.entries(STYLES).map(([k,St])=>({key:"s_"+k, text:`¿Qué tal los platos ${St.label}?`, style:k})),
+  [["brocoli","el brócoli"],["espinacas","las espinacas"],["champis","los champiñones"],["berenjena","la berenjena"],["calabacin","el calabacín"],["aguacate","el aguacate"],["judias","las judías verdes"],["pimiento","el pimiento"],["quinoa","la quinoa"],["cuscus","el cuscús"],["coco","la leche de coco"],["queso","el queso"]]
+    .map(([id,t])=>({key:"i_"+id, text:gusta(t), ids:[id]}))
+);
+function nextQuestion(){ const A=S.asked||{}; return QUESTIONS.find(q=>!(q.key in A) && (!q.ids || q.ids.every(id=>ing(id)))); }
+function answerQuestion(key, val){
+  const q=QUESTIONS.find(x=>x.key===key); if(!q) return; (S.asked=S.asked||{})[key]=val; const T=taste();
+  if(q.ids) q.ids.forEach(id=>{ if(val===2) S.prefs.ing[id]=1; else if(val===-1) S.prefs.ing[id]=-1; else { delete S.prefs.ing[id]; T.ing[id]= val===1? 0.5 : 0; } });
+  if(q.style){ T.style[q.style] = val===2? 2 : val===1? 0.8 : val===0? 0 : -3; }
+  save();
+}
+
+/* ---------- Valorar lo que ya se ha comido ---------- */
+function mealDate(d){ return S.weekStart? new Date(new Date(S.weekStart).getTime()+d*864e5) : null; }
+function isoOf(dt){ const z=n=>String(n).padStart(2,"0"); return dt.getFullYear()+"-"+z(dt.getMonth()+1)+"-"+z(dt.getDate()); }
+function pendingRatings(){
+  if(!S.plan) return []; const out=[]; const now=new Date(); const R=S.rated||{};
+  S.plan.forEach((day,d)=>slots().forEach(sl=>{
+    if(linked() && sl==="comida" && d>0) return; const r=rec(day[sl]); const dt=mealDate(d); if(!r||!dt) return;
+    const end=new Date(dt); end.setHours(sl==="comida"?16:23,0,0,0); if(now<end || now-end>3*864e5) return;
+    const key=S.weekStart.slice(0,10)+"-"+d+"-"+sl; if(key in R) return;
+    out.push({key, r, d, sl, iso:isoOf(dt)});
+  }));
+  return out;
+}
+function rateMeal(key, val){
+  const p = pendingRatings().find(x=>x.key===key); (S.rated=S.rated||{})[key]=val;
+  if(p){ if(val==="skip") logCooked(p.r, null, p.iso); else logCooked(p.r, val, p.iso); }
+  save();
+}
+
+/* ---------- Propuestas ---------- */
+function haveInfo(r){
+  const need = r.ings.filter(([id])=>{ const i=ing(id); return i && !(i[5]||"").includes("p") && id!=="ajo"; });
+  const missing = need.filter(([id])=>!S.have[id]).map(([id])=>shortName(id));
+  return {ratio: need.length? (need.length-missing.length)/need.length : 1, missing, n:need.length};
+}
+function suggestions(mode){
+  const pool = allRecipes().concat(allCombos().filter(c=>!allRecipes().some(r=>r.id===c.id))).filter(eligible);
+  const scored = pool.map(r=>{
+    const h=haveInfo(r), t=tasteScore(r), rp=recencyPenalty(r), cooked=(S.history||[]).some(x=>x.rid===r.id && x.cooked!==false);
+    let sc = t*1.5 - rp*2 + Math.random()*1.2;
+    if(mode==="tengo") sc += h.ratio*14 - h.missing.length*1.5;
+    if(mode==="gusta") sc += t*1.5 + h.ratio*2;
+    if(mode==="nuevo") sc += (cooked? -6 : 4) + (r.gen? 1.5 : 0) + h.ratio*2;
+    if(r.ings.some(([x])=>offerOf(x))) sc += 1;
+    return {r,h,sc};
+  }).sort((a,b)=>b.sc-a.sc);
+  const out=[], perMain={}, perStyle={};
+  for(const x of scored){ const m=mainKey(x.r), st=styleOf(x.r);
+    if((perMain[m]||0)>=2 || (perStyle[st]||0)>=3) continue;
+    perMain[m]=(perMain[m]||0)+1; perStyle[st]=(perStyle[st]||0)+1; out.push(x); if(out.length>=8) break; }
+  return out;
+}
+function reasonFor(x){
+  const r=x.r, bits=[];
+  const last = lastCooked(o=>mainKey(o)===mainKey(r) && o.id!==r.id);
+  if(last && daysAgo(last.date)<=21 && styleOf(rec(last.rid))!==styleOf(r))
+    bits.push(`La última vez de ${mainKey(r)} fue ${STYLE_NAMES[styleOf(rec(last.rid))]||rec(last.rid).name.toLowerCase()} (${daysAgo(last.date)<=1?"ayer":"hace "+daysAgo(last.date)+" días"}); hoy, ${STYLE_NAMES[styleOf(r)]||"distinto"}`);
+  const liked = r.ings.filter(([id])=>S.prefs.ing[id]===1 || (taste().ing[id]||0)>=1).map(([id])=>shortName(id));
+  if((taste().style[styleOf(r)]||0)>=1 && STYLE_NAMES[styleOf(r)]) liked.push("los platos "+STYLE_NAMES[styleOf(r)]);
+  if(liked.length) bits.push("Te gusta: "+[...new Set(liked)].slice(0,3).join(", "));
+  if(!(S.history||[]).some(h=>h.rid===r.id && h.cooked!==false)) bits.push(r.gen? "Combinación nueva para ti" : "Aún no lo has hecho");
+  return bits;
+}
+
+/* ---------- Pantalla Cocinar ---------- */
+let COOK_MODE = "tengo", QUIZ_LATER = false;
+function renderCook(){
+  if(!$("#view-cocinar")) return;
+  const q = nextQuestion(), A=S.asked||{}, done=Object.keys(A).length;
+  $("#quizBox").innerHTML = (q && !QUIZ_LATER)? `<div class="card section quiz">
+      <div class="sheet-head"><h2>Ayúdame a conocerte</h2><span class="hint num">${done+1} de ${QUESTIONS.length}</span></div>
+      <p class="quiz-q">${esc(q.text)}</p>
+      <div class="quiz-a">
+        <button class="btn primary" type="button" data-quiz="${q.key}" data-val="2">😋 Me encanta</button>
+        <button class="btn" type="button" data-quiz="${q.key}" data-val="1">👍 Me gusta</button>
+        <button class="btn" type="button" data-quiz="${q.key}" data-val="0">😐 Normal</button>
+        <button class="btn danger" type="button" data-quiz="${q.key}" data-val="-1">👎 No me gusta</button>
+      </div>
+      <button class="btn small ghost" type="button" data-act="quizlater">Más tarde</button>
+    </div>` : "";
+  document.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.mode===COOK_MODE));
+  const all = Object.assign({}, ING, S.customIng);
+  const groups = [["Carne, pescado y huevos",["Carne","Pescado","Huevos y lácteos"]],["Legumbres, arroz y pasta",["Legumbres y conservas","Pasta, arroz y cereales","Panadería"]],["Fruta y verdura",["Fruta y verdura"]],["Frescos y congelados",["Refrigerados","Congelados","Otros","Despensa"]]];
+  const nHave = Object.keys(S.have).filter(id=>ing(id)).length;
+  $("#haveSum").textContent = `Lo que tengo en casa (${nHave})`;
+  $("#haveChips").innerHTML = `<p class="hint">Toca lo que tienes ahora. También deja de sumar en la lista de la compra.</p>` + groups.map(([t,aisles])=>{
+    const g=Object.entries(all).filter(([id,i])=>aisles.includes(i[1]) && !i[5].includes("p")).sort((a,b)=>a[1][0].localeCompare(b[1][0],"es"));
+    return g.length? `<div class="pref-group"><h3>${t}</h3><div class="toggles">${g.map(([id,i])=>`<button type="button" class="pref" data-v="${S.have[id]?1:0}" data-havechip="${id}" aria-pressed="${!!S.have[id]}">${esc(cleanName(id))}</button>`).join("")}</div></div>` : ""; }).join("");
+  const list = suggestions(COOK_MODE);
+  $("#sugList").innerHTML = list.length? list.map(x=>{ const r=x.r, why=reasonFor(x);
+    return `<div class="card sug">
+      <button class="thumbbtn" type="button" data-open="${r.id}" tabindex="-1" aria-label="Ver ${esc(r.name)}">${dishImg(r,"thumb")}</button>
+      <div><button class="name" type="button" data-open="${r.id}">${esc(r.name)}</button>
+        <div class="chips">${x.h.missing.length? `<span class="chip">Te falta: ${esc(x.h.missing.slice(0,3).join(", "))}${x.h.missing.length>3?"…":""}</span>` : '<span class="chip love">Tienes todo</span>'}<span class="chip num">${r.min} min</span><span class="chip num">${eur(servingCost(r))}/ración</span>${r.gen?'<span class="chip">Combinación</span>':''}</div>
+        ${why.length? `<p class="why">${why.map(esc).join(" · ")}</p>` : ""}
+      </div></div>`; }).join("") : `<div class="card empty">No encuentro platos con tu perfil. Revisa las restricciones en Perfil.</div>`;
+  renderLearned();
+}
+function renderLearned(){
+  const T=taste(); const likeI=Object.keys(S.prefs.ing).filter(k=>S.prefs.ing[k]===1&&ing(k)).map(shortName);
+  const noI=Object.keys(S.prefs.ing).filter(k=>S.prefs.ing[k]===-1&&ing(k)).map(shortName);
+  const likeS=Object.entries(T.style).filter(([,v])=>v>=1).map(([k])=>"platos "+(STYLE_NAMES[k]||k)), noS=Object.entries(T.style).filter(([,v])=>v<=-1).map(([k])=>"platos "+(STYLE_NAMES[k]||k));
+  const loved=Object.keys(S.prefs.rec).filter(k=>S.prefs.rec[k]===1&&rec(k)).map(k=>rec(k).name);
+  const cooked=(S.history||[]).filter(h=>h.cooked!==false).length;
+  const line=(t,a)=>a.length? `<p><b>${t}:</b> ${esc([...new Set(a)].join(", "))}</p>` : "";
+  const body = line("Te gusta",likeI.concat(likeS))+line("Te encantan",loved)+line("No te gusta",noI.concat(noS));
+  $("#learnedBox").innerHTML = `<h2>Lo que he aprendido de ti</h2>${body || '<p class="hint">Todavía poco. Responde las preguntas y valora los platos que comas.</p>'}
+    <p class="hint">${cooked} platos cocinados registrados. Puedes corregir gustos en Perfil.</p>`;
+}
+function ratingCardHtml(){
+  const P=pendingRatings(); if(!P.length) return ""; const p=P[0];
+  return `<div class="card section quiz">
+    <div class="sheet-head"><h2>¿Qué tal estuvo?</h2>${P.length>1?`<span class="hint">quedan ${P.length}</span>`:""}</div>
+    <p class="quiz-q">${esc(p.r.name)} <span class="hint">(${p.sl} del ${DAYS[p.d].toLowerCase()})</span></p>
+    <div class="quiz-a">
+      <button class="btn primary" type="button" data-rate="${p.key}" data-val="2">😋 Me encantó</button>
+      <button class="btn" type="button" data-rate="${p.key}" data-val="1">👍 Bien</button>
+      <button class="btn danger" type="button" data-rate="${p.key}" data-val="-1">👎 No me gustó</button>
+      <button class="btn ghost" type="button" data-rate="${p.key}" data-val="skip">No lo hice</button>
+    </div></div>`;
+}
+function showPlacePicker(rid){
+  const r=rec(rid);
+  openSheet(`<div class="sheet-head"><h2>¿Cuándo lo pones?</h2><button class="btn small ghost" type="button" data-act="close" aria-label="Cerrar">✕</button></div>
+    <p class="hint">${esc(r.name)} sustituirá al plato que haya ese día.</p>
+    ${S.plan? S.plan.map((d,i)=>`<div class="pick-day"><b>${DAYS[i]}</b>${slots().map(sl=>{ const cur=rec(d[sl]); const yest=linked()&&sl==="comida"&&i>0;
+      return `<button class="alt" type="button" data-place="${i}" data-slot="${sl}" data-rid="${rid}" ${yest?'disabled':''}><span><b>${sl==="comida"?"Comida":"Cena"}</b><br><span class="hint">${yest?"sobras de la cena anterior":esc(cur?cur.name:"—")}</span></span><span>›</span></button>`; }).join("")}</div>`).join("") : '<p class="hint">Primero crea un menú en Semana.</p>'}`);
+}
+function showCookedRating(rid){
+  const r=rec(rid);
+  openSheet(`<div class="sheet-head"><h2>¿Qué tal te ha salido?</h2><button class="btn small ghost" type="button" data-act="close" aria-label="Cerrar">✕</button></div>
+    <p class="quiz-q">${esc(r.name)}</p>
+    <div class="quiz-a">
+      <button class="btn primary" type="button" data-cookedrate="${rid}" data-val="2">😋 Me encantó</button>
+      <button class="btn" type="button" data-cookedrate="${rid}" data-val="1">👍 Bien</button>
+      <button class="btn danger" type="button" data-cookedrate="${rid}" data-val="-1">👎 No me gustó</button>
+    </div>`);
+}
+
 /* ---------- Hojas ---------- */
 function openSheet(html){ $("#sheet").innerHTML = html; $("#overlay").classList.add("open"); $("#sheet").scrollTop=0; const f=$("#sheet").querySelector("button,input"); if(f) f.focus(); }
 function closeSheet(){ $("#overlay").classList.remove("open"); }
@@ -823,6 +1128,8 @@ function showRecipe(id, day, slot){
     <ul>${r.ings.map(([iid,q])=>{ const i=ing(iid); return i? `<li>${esc(i[0].replace(/ \(.*\)$/,''))}: <span class="num">${fmtQty(q*n,i[3])}</span></li>`:""; }).join("")}</ul>
     <h3>Pasos</h3><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>
     <div class="actions" style="margin-top:16px">
+      ${day==null? `<button class="btn primary" type="button" data-toplan="${r.id}">Ponerlo en el menú</button>`:""}
+      <button class="btn" type="button" data-cooked="${r.id}">✔ Lo he cocinado</button>
       ${day!=null? `<button class="btn primary" type="button" data-swap="${day}" data-slot="${slot}">Cambiar este plato</button>
       <button class="btn ${S.locks[lk]?'primary':''}" type="button" data-lock="${lk}" data-day="${day}" data-slot="${slot}" data-rid="${r.id}" aria-pressed="${!!S.locks[lk]}">📌 ${S.locks[lk]?'Fijado':'Fijar'}</button>`:""}
       <button class="btn ${S.prefs.rec[r.id]===1?'primary':''}" type="button" data-rpref="${r.id}" data-val="1" aria-pressed="${S.prefs.rec[r.id]===1}">♥ Me encanta</button>
@@ -904,7 +1211,7 @@ function saveNewRecipe(e){
 
 /* ---------- Navegación y eventos ---------- */
 function setTab(t){
-  ["semana","compra","recetas","perfil"].forEach(v=>$("#view-"+v).hidden = v!==t);
+  ["semana","cocinar","compra","recetas","perfil"].forEach(v=>$("#view-"+v).hidden = v!==t);
   document.querySelectorAll("nav.tabs button").forEach(b=>{ if(b.dataset.tab===t) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   if(location.hash !== "#"+t) history.replaceState(null,"","#"+t);
   window.scrollTo(0,0);
@@ -915,6 +1222,16 @@ document.addEventListener("click", async e=>{
   const t = e.target.closest("button,[data-check]"); if(!t) return;
   const d = t.dataset;
   if(d.tab){ setTab(d.tab); return; }
+  if(d.mode){ COOK_MODE=d.mode; renderCook(); return; }
+  if(d.act==="moresug"){ renderCook(); window.scrollTo({top:$("#sugList").offsetTop-80}); return; }
+  if(d.havechip){ if(S.have[d.havechip]) delete S.have[d.havechip]; else S.have[d.havechip]=true; save(); renderCook(); renderShop(); renderSummary(); const det=document.querySelector("details.have"); if(det) det.open=true; const b=document.querySelector(`[data-havechip="${d.havechip}"]`); if(b) b.focus(); return; }
+  if(d.quiz){ answerQuestion(d.quiz, +d.val); renderCook(); toast("Apuntado"); return; }
+  if(d.act==="quizlater"){ QUIZ_LATER=true; renderCook(); return; }
+  if(d.rate){ rateMeal(d.rate, d.val==="skip"?"skip":+d.val); renderAll(); toast(d.val==="-1"?"No te lo volveré a proponer":d.val==="skip"?"Vale":"¡Apuntado!"); return; }
+  if(d.toplan){ showPlacePicker(d.toplan); return; }
+  if(d.place){ const r=rec(d.rid); if(r && r.gen && !(S.saved||[]).includes(r.id)) (S.saved=S.saved||[]).push(r.id); setSlot(S.plan, +d.place, d.slot, d.rid); save(); closeSheet(); renderAll(); toast(`Puesto el ${DAYS[+d.place].toLowerCase()}`); return; }
+  if(d.cooked){ showCookedRating(d.cooked); return; }
+  if(d.cookedrate){ logCooked(rec(d.cookedrate), +d.val); closeSheet(); renderAll(); toast(+d.val<0? "No te lo volveré a proponer" : "¡Apuntado! Lo tendré en cuenta"); return; }
   if(d.people){ const n = Math.min(8, Math.max(1, S.profile.people + (+d.people))); if(n===S.profile.people) return; const sec=(t.closest("section")||{}).id||"view-semana"; S.profile.people = n; applyLimits(n+(n===1?" persona":" personas")); const again=document.querySelector(`#${sec} [data-people="${d.people}"]`); if(again && !again.disabled) again.focus(); return; }
   if(d.pref){ const v = S.prefs.ing[d.pref]||0; const nv = v===0?1: v===1?-1:0; if(nv) S.prefs.ing[d.pref]=nv; else delete S.prefs.ing[d.pref]; save(); renderPrefs(); const b=document.querySelector(`[data-pref="${d.pref}"]`); if(b) b.focus(); return; }
   if(d.rpref){ const val=+d.val; if(S.prefs.rec[d.rpref]===val) delete S.prefs.rec[d.rpref]; else S.prefs.rec[d.rpref]=val;
@@ -986,7 +1303,7 @@ $("#profileForm").addEventListener("submit", e=>{
   p.goal=$("#pGoal").value; p.horno=$("#aHorno").checked; p.air=$("#aAir").checked;
   generate(); save(); renderProfile(); renderAll(); setTab("semana"); toast("Perfil guardado, menú nuevo listo");
 });
-window.addEventListener("hashchange", ()=>{ const h=location.hash.slice(1); if(["semana","compra","recetas","perfil"].includes(h)) setTab(h); });
+window.addEventListener("hashchange", ()=>{ const h=location.hash.slice(1); if(["semana","cocinar","compra","recetas","perfil"].includes(h)) setTab(h); });
 
 /* ---------- Inicio ---------- */
 if(!S.plan) generate();
@@ -1007,7 +1324,7 @@ if(window.CAZUELA_PWA){
 if(!S.weekStart){ S.weekStart = weekMonday(); save(); }
 renderProfile(); renderAll();
 const h0 = location.hash.slice(1);
-setTab(["semana","compra","recetas","perfil"].includes(h0)? h0 : "semana");
+setTab(["semana","cocinar","compra","recetas","perfil"].includes(h0)? h0 : "semana");
 </script>
 </body>
 </html>

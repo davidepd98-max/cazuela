@@ -8,6 +8,12 @@ App de menú semanal para el Lidl de Paiporta (Valencia). Usuario: David, habla 
 - `tools/make_artifact.py`: genera `artifact.html` (versión sin cabecera PWA) para publicar en claude.ai.
 - Artifact en claude.ai: slug `749bc5fa-6ba4-4ba7-94af-cf97860cc784`.
 
+## Cocinar y aprendizaje
+- Pestaña «Cocinar»: propone recetas fijas y combinaciones generadas (`PROT` × `STYLES` × `SIDES`, id `g_<proteína>_<estilo>_<guarnición>`), según lo que hay en casa (`S.have`), gustos y novedad.
+- Aprende con las preguntas (`QUESTIONS`, respuestas en `S.asked`), las valoraciones de platos comidos (`S.rated`, `S.history`) y guarda puntuaciones en `S.taste`. Un «No me gustó» pone `S.prefs.rec[id] = -1`.
+- `recencyPenalty` evita repetir el mismo plato o la misma proteína con el mismo estilo en las últimas semanas, también en el menú semanal.
+- Si añades un ingrediente nuevo, añade sus valores en `NUT` (kcal y proteína por 100 g o por unidad) y, si es proteína o guarnición, considera añadirlo a `PROT`/`SIDES`.
+
 ## Imágenes de los platos
 - Por defecto, ilustración generada (`plateSVG`, colores en `LOOK`). Si añades un ingrediente nuevo, añádele color y forma en `LOOK`.
 - En la app instalada, foto de ejemplo de Wikimedia Commons buscada con `PHOTO_Q[idReceta]`. Si añades una receta, añade también su término de búsqueda (nombre del plato en español o inglés).
